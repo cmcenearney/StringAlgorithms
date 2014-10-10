@@ -64,7 +64,7 @@ public class SuffixTreeNaiveTest {
         tr.addString("defghaha");
         assertEquals(true, tr.hasSuffix("defg"));
         assertEquals(false, tr.hasSuffix("def"));
-        //System.out.println(tr.findNode(t));
+        System.out.println(tr.getAllTerminatingChars(tr.root));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class SuffixTreeNaiveTest {
 
     @Test
     public void exp(){
-        String t = "fg{";
+        String t = "{";
         System.out.print( t.substring(t.length() - 1));
     }
 
