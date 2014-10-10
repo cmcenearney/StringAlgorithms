@@ -1,3 +1,5 @@
+notes.md
+
 # Compiled source #
 ###################
 *.com
@@ -38,8 +40,8 @@ Thumbs.db
 
 # Gradle Files #
 ################
-.gradle
-.m2
+*.gradle
+*.m2
 
 # Build output directies
 target/

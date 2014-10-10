@@ -24,7 +24,3 @@ S = "aabcaabxaaz"
  Z[5] = 1  // aa ...... ab
  ...
  
- 
-In order to achieve linear time, the algorithm 
-
-S = "aaabcaaabxaaz"
