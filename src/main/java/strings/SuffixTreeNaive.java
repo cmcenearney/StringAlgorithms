@@ -1,9 +1,8 @@
 package strings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import com.oracle.webservices.internal.api.message.BasePropertySet;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -95,6 +94,29 @@ public class SuffixTreeNaive {
         return null;
     }
 
+    public Set<String> getAllTerminatingChars(TreeNode node){
+        Set<String> chars = new HashSet<String>();
+        Set<TreeNode> visited = new HashSet<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(node);
+        //visited.add(node);
+        while (!queue.isEmpty()){
+            TreeNode n = queue.remove();
+            for ( Map.Entry<String,TreeNode> e : n.children.entrySet()){
+                TreeNode v = e.getValue();
+                if(!visited.contains(v)){
+                    queue.add(v);
+                }
+                if (v.children.isEmpty()){
+                    String s = e.getKey();
+                    chars.add(s.substring(s.length() - 1));
+                }
+            }
+            visited.add(n);
+        }
+        return chars;
+    }
+
     public boolean hasSuffix(String str){
         TreeNode node = root;
         while (!node.children.isEmpty()){
@@ -104,12 +126,13 @@ public class SuffixTreeNaive {
             String edge = e.get(0);
             if (str.equals(edge) && isEndOfSuffix(node.children.get(edge))){
                 return true;
-            }
-            else if (str.equals(edge.substring(0, edge.length() - 1)) && edgeContainsTerminus(edge)){
+            } else if (str.equals(edge.substring(0, edge.length() - 1)) && edgeContainsTerminus(edge)){
                 return true;
-            } else {
+            } else if (str.startsWith(edge)) {
                 node = node.children.get(edge);
                 str = str.substring(edge.length());
+            } else {
+                return false;
             }
         }
         return false;
