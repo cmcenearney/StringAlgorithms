@@ -47,7 +47,6 @@ public class SuffixTreeNaive {
             - split the edge
                 - new node
     */
-
     public TreeNode addSuffix(String str){
         TreeNode node = root;
         if (node.children.isEmpty()) {
@@ -92,6 +91,13 @@ public class SuffixTreeNaive {
             }
         }
         return null;
+    }
+
+    //TODO: just use a sortedSet for the terminatingChars?
+    // - check that it sorts by codepoint for single-char strings
+    public boolean subTreeContainsAllInputs(TreeNode node){
+        HashSet<String> tc = new HashSet<>(terminatingChars);
+        return getAllTerminatingChars(node).equals(tc);
     }
 
     public Set<String> getAllTerminatingChars(TreeNode node){
@@ -148,6 +154,7 @@ public class SuffixTreeNaive {
     private boolean edgeContainsTerminus(String edge){
         return terminatingChars.stream().anyMatch(c -> c.equals(edge.substring(edge.length()-1)));
     }
+
     public static Integer getLastMatchingIndex(String s1, String s2){
         char[] chars1 = s1. toCharArray();
         char[] chars2 = s2.toCharArray();
@@ -164,5 +171,19 @@ public class SuffixTreeNaive {
                 .collect(Collectors.toList());
     }
 
+    public Integer countNodes(){
+        Set<TreeNode> visited = new HashSet<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        Integer nodes = 0;
+        //visited.add(node);
+        while (!queue.isEmpty()){
+            TreeNode n = queue.remove();
+            n.children.values().stream().forEach(i -> queue.add(i));
+            nodes++;
+            visited.add(n);
+        }
+        return nodes;
+    }
 
 }

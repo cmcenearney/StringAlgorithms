@@ -48,6 +48,7 @@ public class SuffixTreeNaiveTest {
         assertEquals(true, t.hasSuffix("AGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG"));
         String sfx = "TGTCGTTAAAATTGATAAGCATAGACAGGTCTTTAGCGACACCTCAGAAATCACTTCAGCAGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG";
         assertTrue(t.hasSuffix(sfx));
+        System.out.print(t.countNodes());
     }
 
     @Test
@@ -65,6 +66,7 @@ public class SuffixTreeNaiveTest {
         assertEquals(true, tr.hasSuffix("defg"));
         assertEquals(false, tr.hasSuffix("def"));
         System.out.println(tr.getAllTerminatingChars(tr.root));
+        assertEquals(true, tr.subTreeContainsAllInputs(tr.root));
     }
 
     @Test
