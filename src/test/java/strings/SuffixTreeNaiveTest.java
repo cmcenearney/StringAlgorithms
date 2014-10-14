@@ -18,8 +18,8 @@ public class SuffixTreeNaiveTest {
 
     @Test
     public void testAllSuffixes(){
-        String s = "abcdefg";
-        HashSet<String> expected = new HashSet<String>(Arrays.asList("abcdefg", "bcdefg", "cdefg", "defg", "efg","fg", "g"));
+        String s = "abcdefg$";
+        HashSet<String> expected = new HashSet<String>(Arrays.asList("abcdefg$", "bcdefg$", "cdefg$", "defg$", "efg$","fg$", "g$"));
         assertEquals(expected, SuffixTreeNaive.allSuffixes(s));
     }
 
@@ -32,6 +32,49 @@ public class SuffixTreeNaiveTest {
         t.addString("two");
         expected = new String(Character.toChars(0x7c));
         assertEquals(expected, t.terminatingChars.get(t.terminatingChars.size() - 1));
+    }
+
+    /*
+    >Rosalind_1
+GATTACA
+>Rosalind_2
+TAGACCA
+>Rosalind_3
+ATACA
+     */
+
+    @Test
+    public void testAllNodesAreCommonToAllWithSingleInput(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GATTACA");
+        List<TreeNode> lcs = t.getCommonSubStringNodes();
+        t.getCommonSubStringNodes().stream()
+                .forEach(n -> assertTrue(n.commonToAll));
+    }
+
+    @Test
+    public void testNodeValueSimple(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GA");
+        t.addString("AT");
+        List<TreeNode> lcs = t.getCommonSubStringNodes();
+        for(TreeNode n : lcs){
+            String v = t.nodeValue(n);
+            System.out.println(v);
+        }
+
+    }
+
+
+    @Test
+    public void testSmallCase2(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GATTACA");
+        t.addString("TAGACCA");
+        t.addString("ATACA");
+        List<TreeNode> lcs = t.getCommonSubStringNodes();
+        t.getCommonSubStringNodes().stream()
+                .forEach(n -> System.out.println(t.nodeValue(n)));
     }
 
     @Test
@@ -48,7 +91,8 @@ public class SuffixTreeNaiveTest {
         assertEquals(true, t.hasSuffix("AGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG"));
         String sfx = "TGTCGTTAAAATTGATAAGCATAGACAGGTCTTTAGCGACACCTCAGAAATCACTTCAGCAGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG";
         assertTrue(t.hasSuffix(sfx));
-        System.out.print(t.countNodes());
+        System.out.println(t.countNodes());
+        System.out.println(t.countCommonSubStrings());
     }
 
     @Test
@@ -83,7 +127,7 @@ public class SuffixTreeNaiveTest {
 
     @Test
     public void exp(){
-        String t = "{";
+        String t = "{a";
         System.out.print( t.substring(t.length() - 1));
     }
 
