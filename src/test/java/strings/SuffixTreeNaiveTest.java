@@ -3,7 +3,6 @@ package strings;
 import org.junit.Test;
 import util.Fasta;
 import util.Utils;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,14 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import static org.junit.Assert.*;
 
 public class SuffixTreeNaiveTest {
 
     @Test
-    public void testAllSuffixes(){
+    public void testAllSuffixesOmitsTerminatingChar(){
         String s = "abcdefg$";
         HashSet<String> expected = new HashSet<String>(Arrays.asList("abcdefg$", "bcdefg$", "cdefg$", "defg$", "efg$","fg$", "g$"));
         assertEquals(expected, SuffixTreeNaive.allSuffixes(s));
@@ -108,6 +105,7 @@ public class SuffixTreeNaiveTest {
                 .map(n -> t.nodeValue(n))
                 .collect(Collectors.toSet());
         HashSet<String> expected = new HashSet<String>(Arrays.asList("A", "BCA", "ABCA", "T", "CA"));
+                // the 'raw' common substrings are different than the 'real' ones, which would be:
                 //new HashSet<String>(Arrays.asList("A","B","C", "T", "AB","ABC","ABCA", "BCA", "BC"));
         assertEquals(expected, lcs);
         System.out.print(t.getLongestCommonSubStrings());
@@ -123,7 +121,6 @@ public class SuffixTreeNaiveTest {
         for(Fasta f : inputs){
             t.addString(f.getSeq());
         }
-        //System.out.println(t.getLongestCommonSubStrings());
         assertEquals(expected, t.getLongestCommonSubStrings().get(0));
     }
 
