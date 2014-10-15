@@ -108,7 +108,6 @@ public class SuffixTreeNaiveTest {
                 // the 'raw' common substrings are different than the 'real' ones, which would be:
                 //new HashSet<String>(Arrays.asList("A","B","C", "T", "AB","ABC","ABCA", "BCA", "BC"));
         assertEquals(expected, lcs);
-        System.out.print(t.getLongestCommonSubStrings());
     }
 
     @Test
@@ -116,7 +115,7 @@ public class SuffixTreeNaiveTest {
         String expected = "ACTGCGGTCTAAGGCGACGCAATGAGGAGGTAGAT";
         String raw = new String(Files.readAllBytes(Paths.get("src/test/resources/rosalind_lcsm.txt")));
         List<Fasta> inputs = Utils.parseRawFastas(raw);
-        System.out.println(inputs.size());
+        assert(inputs.size() == 100);
         SuffixTreeNaive t = new SuffixTreeNaive();
         for(Fasta f : inputs){
             t.addString(f.getSeq());

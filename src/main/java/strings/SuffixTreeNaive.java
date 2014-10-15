@@ -1,7 +1,5 @@
 package strings;
 
-import com.oracle.webservices.internal.api.message.BasePropertySet;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -88,27 +86,23 @@ public class SuffixTreeNaive {
     // - check that it sorts by codepoint for single-char strings
     public boolean subTreeContainsAllInputs(TreeNode node) {
         HashSet<String> tc = new HashSet<>(terminatingChars);
-        return getAllTerminatingChars(node).equals(tc);
+        return getAllTerminatingCharsInTree(node).equals(tc);
     }
 
-    public Set<String> getAllTerminatingChars(TreeNode node) {
+    public Set<String> getAllTerminatingCharsInTree(TreeNode node) {
         Set<String> chars = new HashSet<String>();
-        Set<TreeNode> visited = new HashSet<>();
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(node);
         while (!queue.isEmpty()) {
             TreeNode n = queue.remove();
             for (Map.Entry<String, TreeNode> e : n.getChildren().entrySet()) {
                 TreeNode v = e.getValue();
-                if (!visited.contains(v)) {
-                    queue.add(v);
-                }
+                queue.add(v);
                 if (!v.hasChildren()) {
                     String s = e.getKey();
                     chars.add(s.substring(s.length() - 1));
                 }
             }
-            visited.add(n);
         }
         return chars;
     }
@@ -129,11 +123,11 @@ public class SuffixTreeNaive {
 
 
     private String getEdge(TreeNode parent, TreeNode child) {
-        for (Map.Entry<String, TreeNode> edge : parent.getChildren().entrySet()) {
-            if (edge.getValue() == child)
-                return edge.getKey();
-        }
-        return null;
+        return parent.getChildren().entrySet().stream()
+                .filter(e -> e.getValue().equals(child))
+                .map(e -> e.getKey())
+                .collect(Collectors.toList())
+                .get(0);
     }
 
     public boolean hasSuffix(String str) {
@@ -185,7 +179,6 @@ public class SuffixTreeNaive {
     }
 
     public Integer countNodes() {
-        Set<TreeNode> visited = new HashSet<>();
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(root);
         Integer nodes = 0;
@@ -193,13 +186,11 @@ public class SuffixTreeNaive {
             TreeNode n = queue.remove();
             n.getChildren().values().stream().forEach(i -> queue.add(i));
             nodes++;
-            visited.add(n);
         }
         return nodes;
     }
 
     public List<TreeNode> getCommonSubStringNodes() {
-        Set<TreeNode> visited = new HashSet<>();
         Queue<TreeNode> queue = new LinkedList<>();
         List<TreeNode> results = new ArrayList<>();
         queue.add(root);
@@ -208,7 +199,6 @@ public class SuffixTreeNaive {
             n.getChildren().values().stream().forEach(i -> queue.add(i));
             if (subTreeContainsAllInputs(n) && n.getParent() != null)
                 results.add(n);
-            visited.add(n);
         }
         return results;
     }
