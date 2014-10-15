@@ -17,9 +17,7 @@ public class SuffixTreeNaive {
     TreeNode root = new TreeNode();
     private static final int FIRST_TERM_CHAR_VALUE = 0x7b;
 
-    public SuffixTreeNaive() {
-        this.root.commonToAll = true;
-    }
+    public SuffixTreeNaive() {}
 
     public void addString(String s) {
         String termChar = nextTerminatingChar();
@@ -52,58 +50,36 @@ public class SuffixTreeNaive {
     */
     public TreeNode addSuffix(String str) {
         TreeNode node = root;
-        //setStatus(node);
         //special case - first time through
-        if (node.children.isEmpty()) {
-            node.children.put(str, new TreeNode(currentTermChar(), node));
-            node = node.children.get(str);
-            setStatus(node);
-            return node;
+        if (!node.hasChildren()) {
+            return node.addChild(str);
         }
-        while (!node.children.isEmpty()) {
-            List<String> e = getEdgeWithSameFirstChar(node.children, str);
+        while (node.hasChildren()) {
+            List<String> e = getEdgeWithSameFirstChar(node.getChildren(), str);
             //if no edges start with the first char -> add a new one
             if (e.isEmpty()) {
-                //setStatus(node);
-                node.children.put(str, new TreeNode(currentTermChar(), node));
-                node = node.children.get(str);
-                setStatus(node);
-                return node;
+                return node.addChild(str);
             }
             //else find edge that starts with first char
             String edge = e.get(0);
-
-
             int m = getLastMatchingIndex(str, edge);
             String edgeRemainder = edge.substring(m + 1);
             String strRemainder = str.substring(m + 1);
             String match = edge.substring(0, getLastMatchingIndex(str, edge) + 1);
             //keep traversing?
             if (str.startsWith(edge)) {
-                setStatus(node);
-                node = node.children.get(edge);
+                node = node.getChild(edge);
                 str = strRemainder;
             }
             //if not, split the edge
             else {
-                setStatus(node);
-                TreeNode oldNode = node.children.get(edge);
-                TreeNode newNode = new TreeNode(currentTermChar(), node);
-                node.children.remove(edge);
-                String newEdge = edge.substring(0, getLastMatchingIndex(str, edge) + 1);
-                node.children.put(newEdge, newNode);
-                newNode.children.put(edgeRemainder, oldNode);
-                oldNode.parent = newNode;
-                newNode.children.put(strRemainder, new TreeNode(currentTermChar(), node));
-                newNode.commonToAll = oldNode.commonToAll;
-                TreeNode newest =  newNode.children.get(strRemainder);
-                setStatus(newNode);
-                setStatus(oldNode);
-                setStatus(newest);
-                return newest;
+                TreeNode oldNode = node.getChild(edge);
+                TreeNode newNode = new TreeNode(match, node);
+                node.removeChild(edge);
+                node.addChild(match, newNode);
+                newNode.addChild(edgeRemainder, oldNode);
+                return newNode.addChild(strRemainder);
             }
-
-
         }
         return null;
     }
@@ -120,15 +96,14 @@ public class SuffixTreeNaive {
         Set<TreeNode> visited = new HashSet<>();
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(node);
-        //visited.add(node);
         while (!queue.isEmpty()) {
             TreeNode n = queue.remove();
-            for (Map.Entry<String, TreeNode> e : n.children.entrySet()) {
+            for (Map.Entry<String, TreeNode> e : n.getChildren().entrySet()) {
                 TreeNode v = e.getValue();
                 if (!visited.contains(v)) {
                     queue.add(v);
                 }
-                if (v.children.isEmpty()) {
+                if (!v.hasChildren()) {
                     String s = e.getKey();
                     chars.add(s.substring(s.length() - 1));
                 }
@@ -141,23 +116,20 @@ public class SuffixTreeNaive {
     public String nodeValue(TreeNode n) {
         String s = "";
         LinkedList<String> stack = new LinkedList<>();
-        //stack.push(n);
-        while (n.parent != null) {
-            String e = getEdge(n.parent, n);
+        while (n.getParent() != null) {
+            String e = getEdge(n.getParent(), n);
             stack.push(e);
-            n = n.parent;
+            n = n.getParent();
         }
         while (!stack.isEmpty()) {
-            //System.out.println("peek: " + stack.peekFirst());
-            s = stack.pop() + s;
-            //System.out.println("s: " + s);
+            s = s + stack.pop();
         }
         return s;
     }
 
 
     private String getEdge(TreeNode parent, TreeNode child) {
-        for (Map.Entry<String, TreeNode> edge : parent.children.entrySet()) {
+        for (Map.Entry<String, TreeNode> edge : parent.getChildren().entrySet()) {
             if (edge.getValue() == child)
                 return edge.getKey();
         }
@@ -166,17 +138,17 @@ public class SuffixTreeNaive {
 
     public boolean hasSuffix(String str) {
         TreeNode node = root;
-        while (!node.children.isEmpty()) {
-            List<String> e = getEdgeWithSameFirstChar(node.children, str);
+        while (node.hasChildren()) {
+            List<String> e = getEdgeWithSameFirstChar(node.getChildren(), str);
             if (e.isEmpty())
                 return false;
             String edge = e.get(0);
-            if (str.equals(edge) && isEndOfSuffix(node.children.get(edge))) {
+            if (str.equals(edge) && isEndOfSuffix(node.getChild(edge))) {
                 return true;
             } else if (str.equals(edge.substring(0, edge.length() - 1)) && edgeContainsTerminus(edge)) {
                 return true;
             } else if (str.startsWith(edge)) {
-                node = node.children.get(edge);
+                node = node.getChild(edge);
                 str = str.substring(edge.length());
             } else {
                 return false;
@@ -186,9 +158,9 @@ public class SuffixTreeNaive {
     }
 
     private boolean isEndOfSuffix(TreeNode node) {
-        if (node.children.isEmpty())
+        if (!node.hasChildren())
             return true;
-        return node.children.keySet().stream()
+        return node.getChildren().keySet().stream()
                 .anyMatch(k -> terminatingChars.contains(k));
     }
 
@@ -217,10 +189,9 @@ public class SuffixTreeNaive {
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(root);
         Integer nodes = 0;
-        //visited.add(node);
         while (!queue.isEmpty()) {
             TreeNode n = queue.remove();
-            n.children.values().stream().forEach(i -> queue.add(i));
+            n.getChildren().values().stream().forEach(i -> queue.add(i));
             nodes++;
             visited.add(n);
         }
@@ -234,8 +205,8 @@ public class SuffixTreeNaive {
         queue.add(root);
         while (!queue.isEmpty()) {
             TreeNode n = queue.remove();
-            n.children.values().stream().forEach(i -> queue.add(i));
-            if (n.checkChar == currentTermChar() && n.parent != null)
+            n.getChildren().values().stream().forEach(i -> queue.add(i));
+            if (subTreeContainsAllInputs(n) && n.getParent() != null)
                 results.add(n);
             visited.add(n);
         }
@@ -243,19 +214,22 @@ public class SuffixTreeNaive {
     }
 
     public Integer countCommonSubStrings() {
-        Set<TreeNode> visited = new HashSet<>();
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        Integer nodes = 0;
-        //visited.add(node);
-        while (!queue.isEmpty()) {
-            TreeNode n = queue.remove();
-            n.children.values().stream().forEach(i -> queue.add(i));
-            if (n.checkChar == currentTermChar())
-                nodes++;
-            visited.add(n);
-        }
-        return nodes;
+        return getCommonSubStringNodes().size();
+    }
+
+    public List<String> getCommonSubStrings() {
+        return getCommonSubStringNodes().stream()
+                .map(n -> nodeValue(n))
+                .sorted( (s1, s2) -> s2.length() - s1.length())
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getLongestCommonSubStrings() {
+        List<String> xs = getCommonSubStrings();
+        Integer k = xs.get(0).length();
+        return xs.stream()
+                .filter(s -> s.length() == k)
+                .collect(Collectors.toList());
     }
 
     public String currentTermChar() {
@@ -269,11 +243,6 @@ public class SuffixTreeNaive {
         return terminatingChars.get(terminatingChars.size() - 2);
     }
 
-    private void setStatus(TreeNode n) {
-        if (n.checkChar == previousTermChar()) {
-            n.checkChar = currentTermChar();
-            //n.commonToAll = true;
-        }
-    }
+
 
 }

@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -34,22 +36,13 @@ public class SuffixTreeNaiveTest {
         assertEquals(expected, t.terminatingChars.get(t.terminatingChars.size() - 1));
     }
 
-    /*
-    >Rosalind_1
-GATTACA
->Rosalind_2
-TAGACCA
->Rosalind_3
-ATACA
-     */
-
     @Test
     public void testAllNodesAreCommonToAllWithSingleInput(){
         SuffixTreeNaive t = new SuffixTreeNaive();
         t.addString("GATTACA");
         List<TreeNode> lcs = t.getCommonSubStringNodes();
         t.getCommonSubStringNodes().stream()
-                .forEach(n -> assertTrue(n.commonToAll));
+                .forEach(n -> assertTrue(t.subTreeContainsAllInputs(n)));
     }
 
     @Test
@@ -58,11 +51,21 @@ ATACA
         t.addString("GA");
         t.addString("AT");
         List<TreeNode> lcs = t.getCommonSubStringNodes();
-        for(TreeNode n : lcs){
-            String v = t.nodeValue(n);
-            System.out.println(v);
-        }
+        assert(lcs.size() == 1);
+        assertEquals("A", t.nodeValue(lcs.get(0)));
+    }
 
+    @Test
+    public void testNodeValueSimple2(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GAT");
+        t.addString("ATT");
+        Set<String> lcs = t.getCommonSubStringNodes().stream()
+                .map(n -> t.nodeValue(n))
+                .collect(Collectors.toSet());
+        HashSet<String> expected = new HashSet<String>(Arrays.asList("T","AT"));
+        assert(lcs.size() == 2);
+        assertEquals(expected, lcs);
     }
 
 
@@ -72,13 +75,47 @@ ATACA
         t.addString("GATTACA");
         t.addString("TAGACCA");
         t.addString("ATACA");
-        List<TreeNode> lcs = t.getCommonSubStringNodes();
-        t.getCommonSubStringNodes().stream()
-                .forEach(n -> System.out.println(t.nodeValue(n)));
+        t.getCommonSubStringNodes();
+        Set<String> lcs = t.getCommonSubStringNodes().stream()
+                .map(n -> t.nodeValue(n))
+                .collect(Collectors.toSet());
+        HashSet<String> expected = new HashSet<String>(Arrays.asList("TA","AC","CA", "T", "C", "A"));
+        assertEquals(expected, lcs);
+    }
+
+    @Test
+    public void testSmallCase3(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GATTABA");
+        t.addString("TAGABCA");
+        t.addString("ATABA");
+        t.getCommonSubStringNodes();
+        Set<String> lcs = t.getCommonSubStringNodes().stream()
+                .map(n -> t.nodeValue(n))
+                .collect(Collectors.toSet());
+        HashSet<String> expected = new HashSet<String>(Arrays.asList("A","AB","B", "T", "TA"));
+        assertEquals(expected, lcs);
+    }
+
+    @Test
+    public void testSmallCase4(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GATTDFDFDFABCA");
+        t.addString("TAGABCA");
+        t.addString("ATABCA");
+        t.getCommonSubStringNodes();
+        Set<String> lcs = t.getCommonSubStringNodes().stream()
+                .map(n -> t.nodeValue(n))
+                .collect(Collectors.toSet());
+        HashSet<String> expected = new HashSet<String>(Arrays.asList("A", "BCA", "ABCA", "T", "CA"));
+                //new HashSet<String>(Arrays.asList("A","B","C", "T", "AB","ABC","ABCA", "BCA", "BC"));
+        assertEquals(expected, lcs);
+        System.out.print(t.getLongestCommonSubStrings());
     }
 
     @Test
     public void testWithRosalindData() throws IOException {
+        String expected = "ACTGCGGTCTAAGGCGACGCAATGAGGAGGTAGAT";
         String raw = new String(Files.readAllBytes(Paths.get("src/test/resources/rosalind_lcsm.txt")));
         List<Fasta> inputs = Utils.parseRawFastas(raw);
         System.out.println(inputs.size());
@@ -86,50 +123,21 @@ ATACA
         for(Fasta f : inputs){
             t.addString(f.getSeq());
         }
-        System.out.println(t.terminatingChars.size());
-        assertEquals(true, t.hasSuffix("GACCAAACCGAACCTC"));
-        assertEquals(true, t.hasSuffix("AGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG"));
-        String sfx = "TGTCGTTAAAATTGATAAGCATAGACAGGTCTTTAGCGACACCTCAGAAATCACTTCAGCAGTTCGTCTCCCTAACGTGGTGCTGTTGTCATCTGTAAAG";
-        assertTrue(t.hasSuffix(sfx));
-        System.out.println(t.countNodes());
-        System.out.println(t.countCommonSubStrings());
+        //System.out.println(t.getLongestCommonSubStrings());
+        assertEquals(expected, t.getLongestCommonSubStrings().get(0));
     }
 
-    @Test
-    public void testing(){
-        String s = "abcdefg";
-        String t = "abc";
-        System.out.println(s.substring(t.length()));
-        System.out.println(SuffixTreeNaive.getLastMatchingIndex("onesies", "onerous"));
-        SuffixTreeNaive tr = new SuffixTreeNaive();
-        tr.addString(s);
-        tr.addString("abde");
-        assertEquals(true, tr.hasSuffix("defg"));
-        tr.addString("abdedefg");
-        tr.addString("defghaha");
-        assertEquals(true, tr.hasSuffix("defg"));
-        assertEquals(false, tr.hasSuffix("def"));
-        System.out.println(tr.getAllTerminatingChars(tr.root));
-        assertEquals(true, tr.subTreeContainsAllInputs(tr.root));
-    }
-
-    @Test
-    public void testUnicodeLiterals(){
-        System.out.println("\u00ad");
-        System.out.println(Integer.toHexString(123));
-        System.out.println(0x7b);
-        System.out.println(0xFFFF);
-        System.out.println(new String(Character.toChars(0x10FFFF)));
-        String s = "abcdefg";
-        System.out.print(  s.substring(0,s.length()));
-        //IntStream.range(0x7b, 0xff).forEachOrdered(i -> System.out.println( "\\u00" + Integer.toHexString(i) ));
-    }
-
-    @Test
-    public void exp(){
-        String t = "{a";
-        System.out.print( t.substring(t.length() - 1));
-    }
+//    @Test
+//    public void testUnicodeLiterals(){
+//        System.out.println("\u00ad");
+//        System.out.println(Integer.toHexString(123));
+//        System.out.println(0x7b);
+//        System.out.println(0xFFFF);
+//        System.out.println(new String(Character.toChars(0x10FFFF)));
+//        String s = "abcdefg";
+//        System.out.print(  s.substring(0,s.length()));
+//        //IntStream.range(0x7b, 0xff).forEachOrdered(i -> System.out.println( "\\u00" + Integer.toHexString(i) ));
+//    }
 
 
 }
