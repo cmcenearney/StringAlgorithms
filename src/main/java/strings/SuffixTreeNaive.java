@@ -1,8 +1,10 @@
 package strings;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /*
@@ -82,6 +84,35 @@ public class SuffixTreeNaive {
         return null;
     }
 
+    public Integer countNodes() {
+        return breadthFirstTraversal(root).size();
+    }
+
+    public List<TreeNode> getCommonSubStringNodes() {
+        return breadthFirstTraversal(root).stream()
+                .filter(n -> (subTreeContainsAllInputs(n) && n.getParent() != null))
+                .collect(Collectors.toList());
+    }
+
+    public Integer countCommonSubStrings() {
+        return getCommonSubStringNodes().size();
+    }
+
+    public List<String> getCommonSubStrings() {
+        return getCommonSubStringNodes().stream()
+                .map(n -> nodeValue(n))
+                .sorted( (s1, s2) -> s2.length() - s1.length())
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getLongestCommonSubStrings() {
+        List<String> xs = getCommonSubStrings();
+        Integer k = xs.get(0).length();
+        return xs.stream()
+                .filter(s -> s.length() == k)
+                .collect(Collectors.toList());
+    }
+
     //TODO: just use a sortedSet for the terminatingChars?
     // - check that it sorts by codepoint for single-char strings
     public boolean subTreeContainsAllInputs(TreeNode node) {
@@ -90,21 +121,22 @@ public class SuffixTreeNaive {
     }
 
     public Set<String> getAllTerminatingCharsInTree(TreeNode node) {
-        Set<String> chars = new HashSet<String>();
+        return breadthFirstTraversal(node).stream()
+                .filter(n -> !n.hasChildren())
+                .map(n -> lastChar(n.getValue()) )
+                .collect(Collectors.toSet());
+    }
+
+    public List<TreeNode> breadthFirstTraversal(TreeNode node){
+        List<TreeNode> results = new LinkedList<>();
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(node);
         while (!queue.isEmpty()) {
             TreeNode n = queue.remove();
-            for (Map.Entry<String, TreeNode> e : n.getChildren().entrySet()) {
-                TreeNode v = e.getValue();
-                queue.add(v);
-                if (!v.hasChildren()) {
-                    String s = e.getKey();
-                    chars.add(s.substring(s.length() - 1));
-                }
-            }
+            n.getChildren().values().stream().forEach(i -> queue.add(i));
+            results.add(n);
         }
-        return chars;
+        return results;
     }
 
     public String nodeValue(TreeNode n) {
@@ -121,6 +153,9 @@ public class SuffixTreeNaive {
         return s;
     }
 
+    private String lastChar(String s){
+        return s.substring(s.length() - 1);
+    }
 
     private String getEdge(TreeNode parent, TreeNode child) {
         return parent.getChildren().entrySet().stream()
@@ -159,7 +194,7 @@ public class SuffixTreeNaive {
     }
 
     private boolean edgeContainsTerminus(String edge) {
-        return terminatingChars.stream().anyMatch(c -> c.equals(edge.substring(edge.length() - 1)));
+        return terminatingChars.stream().anyMatch(c -> c.equals(lastChar(edge)));
     }
 
     public static Integer getLastMatchingIndex(String s1, String s2) {
@@ -175,50 +210,6 @@ public class SuffixTreeNaive {
     public List<String> getEdgeWithSameFirstChar(HashMap<String, TreeNode> edges, String str) {
         return edges.keySet().stream()
                 .filter(s -> s.startsWith(str.substring(0, 1)))
-                .collect(Collectors.toList());
-    }
-
-    public Integer countNodes() {
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        Integer nodes = 0;
-        while (!queue.isEmpty()) {
-            TreeNode n = queue.remove();
-            n.getChildren().values().stream().forEach(i -> queue.add(i));
-            nodes++;
-        }
-        return nodes;
-    }
-
-    public List<TreeNode> getCommonSubStringNodes() {
-        Queue<TreeNode> queue = new LinkedList<>();
-        List<TreeNode> results = new ArrayList<>();
-        queue.add(root);
-        while (!queue.isEmpty()) {
-            TreeNode n = queue.remove();
-            n.getChildren().values().stream().forEach(i -> queue.add(i));
-            if (subTreeContainsAllInputs(n) && n.getParent() != null)
-                results.add(n);
-        }
-        return results;
-    }
-
-    public Integer countCommonSubStrings() {
-        return getCommonSubStringNodes().size();
-    }
-
-    public List<String> getCommonSubStrings() {
-        return getCommonSubStringNodes().stream()
-                .map(n -> nodeValue(n))
-                .sorted( (s1, s2) -> s2.length() - s1.length())
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getLongestCommonSubStrings() {
-        List<String> xs = getCommonSubStrings();
-        Integer k = xs.get(0).length();
-        return xs.stream()
-                .filter(s -> s.length() == k)
                 .collect(Collectors.toList());
     }
 

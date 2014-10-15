@@ -35,6 +35,10 @@ public class TreeNode {
         return children.get(s);
     }
 
+    public String getValue(){
+        return (String) parent.keySet().toArray()[0];
+    }
+
     public TreeNode getChild(String s){
         return children.get(s);
     }
