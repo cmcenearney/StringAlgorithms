@@ -6,11 +6,17 @@ class TreeNode {
 
     private HashMap<String, TreeNode> children = new HashMap<>();
     private HashMap<String, TreeNode> parent = new HashMap<>();
+    Integer p = null;
 
     TreeNode(){}
 
     TreeNode(String s, TreeNode parent){
         setParent(s, parent);
+    }
+
+    TreeNode(String s, TreeNode parent, Integer p){
+        setParent(s, parent);
+        this.p = p;
     }
 
     void setParent(String s, TreeNode p){
@@ -28,6 +34,12 @@ class TreeNode {
         children.put(s, new TreeNode(s, this));
         return children.get(s);
     }
+
+    TreeNode addChild(String s, Integer position){
+        children.put(s, new TreeNode(s, this, position));
+        return children.get(s);
+    }
+
 
     TreeNode addChild(String s, TreeNode n){
         children.put(s, n);

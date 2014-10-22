@@ -13,8 +13,6 @@ This implementation is not generalized.
  */
 public class ImplicitSuffixTree extends Tree {
 
-    //TreeNode root = new TreeNode();
-
     public ImplicitSuffixTree() {}
 
     public void addString(String s){

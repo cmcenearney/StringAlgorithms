@@ -11,7 +11,6 @@ capacity = 1113988 strings (based on available terminating chars from 0x7b to 0x
 public class SuffixTreeNaive extends Tree {
 
     ArrayList<String> terminatingChars = new ArrayList<>();
-    //TreeNode root = new TreeNode();
     private static final int FIRST_TERM_CHAR_VALUE = 0x7b;
 
     public SuffixTreeNaive() {}
@@ -19,8 +18,11 @@ public class SuffixTreeNaive extends Tree {
     public void addString(String s) {
         String termChar = nextTerminatingChar();
         terminatingChars.add(termChar);
-        s += termChar;
-        allSuffixes(s).stream().forEach(sfx -> addSuffix(sfx));
+        //s += termChar;
+        final String st = s + termChar;
+        //allSuffixes(s).stream().forEach(sfx -> addSuffix(sfx));
+        IntStream.range(0, st.length() - 1).boxed()
+                .forEach(i -> addSuffix(st.substring(i), i));
     }
 
     private String nextTerminatingChar() {
@@ -45,17 +47,17 @@ public class SuffixTreeNaive extends Tree {
                 - new node
     returns new node
     */
-    public TreeNode addSuffix(String str) {
+    public TreeNode addSuffix(String str, Integer position) {
         TreeNode node = root;
         //special case - first time through
         if (!node.hasChildren()) {
-            return node.addChild(str);
+            return node.addChild(str, position);
         }
         while (node.hasChildren()) {
             List<String> e = getEdgeWithSameFirstChar(node.getChildren(), str);
             //if no edges start with the first char -> add a new one
             if (e.isEmpty()) {
-                return node.addChild(str);
+                return node.addChild(str, position);
             }
             //else find edge that starts with first char
             String edge = e.get(0);
@@ -75,7 +77,7 @@ public class SuffixTreeNaive extends Tree {
                 node.removeChild(edge);
                 node.addChild(match, newNode);
                 newNode.addChild(edgeRemainder, oldNode);
-                return newNode.addChild(strRemainder);
+                return newNode.addChild(strRemainder, position);
             }
         }
         return null;
@@ -138,6 +140,24 @@ public class SuffixTreeNaive extends Tree {
         return s;
     }
 
+    public HashMap<String,List<Integer>> getStringPositions(String s){
+        HashMap<String,List<Integer>> results = new HashMap<>();
+        TreeNode node = find(s);
+        for (TreeNode n :  breadthFirstTraversal(node).stream().filter(l -> !l.hasChildren()).collect(Collectors.toList())){
+            String tc = lastChar(n.getValue());
+            if (results.containsKey(tc)){
+                List<Integer> positions = results.get(tc);
+                positions.add(n.p);
+                results.put(tc, positions);
+            } else {
+                List<Integer> positions = new ArrayList<>();
+                positions.add(n.p);
+                results.put(tc,positions);
+            }
+        }
+        return results;
+    }
+
     private String lastChar(String s){
         return s.substring(s.length() - 1);
     }
@@ -148,6 +168,27 @@ public class SuffixTreeNaive extends Tree {
                 .map(e -> e.getKey())
                 .collect(Collectors.toList())
                 .get(0);
+    }
+
+    public TreeNode find(String str) {
+        TreeNode node = root;
+        while (node.hasChildren()) {
+            List<String> e = getEdgeWithSameFirstChar(node.getChildren(), str);
+            if (e.isEmpty())
+                return null;
+            String edge = e.get(0);
+            if (str.equals(edge) && isEndOfSuffix(node.getChild(edge))) {
+                return node.getChild(edge);
+            } else if (str.equals(edge.substring(0, edge.length() - 1)) && edgeContainsTerminus(edge)) {
+                return node;
+            } else if (str.startsWith(edge)) {
+                node = node.getChild(edge);
+                str = str.substring(edge.length());
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     public boolean hasSuffix(String str) {
@@ -181,8 +222,6 @@ public class SuffixTreeNaive extends Tree {
     private boolean edgeContainsTerminus(String edge) {
         return terminatingChars.stream().anyMatch(c -> c.equals(lastChar(edge)));
     }
-
-
 
     public String currentTermChar() {
         return terminatingChars.get(terminatingChars.size() - 1);

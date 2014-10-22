@@ -7,10 +7,7 @@ import strings.util.Utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -81,6 +78,12 @@ public class SuffixTreeNaiveTest {
                 .collect(Collectors.toSet());
         HashSet<String> expected = new HashSet<String>(Arrays.asList("TA","AC","CA", "T", "C", "A"));
         assertEquals(expected, lcs);
+        System.out.print(
+        t.breadthFirstTraversal(t.root).stream()
+                .filter(n -> n.hasChildren())
+                .filter(n -> n.p != null)
+                .count()
+        );
     }
 
     @Test
@@ -114,6 +117,21 @@ public class SuffixTreeNaiveTest {
     }
 
     @Test
+    public void testLCSSmallCase(){
+        SuffixTreeNaive t = new SuffixTreeNaive();
+        t.addString("GATTDFDFDFABCA");
+        t.addString("TAGABCA");
+        t.addString("ABCAATABCA");
+        String expected = "ABCA";
+        assertEquals(expected, t.getLongestCommonSubStrings().get(0));
+        //{{=[10], |=[3], }=[0, 6]}
+        HashMap<String,List<Integer>> x = t.getStringPositions(expected);
+        assertEquals(new ArrayList<Integer>(Arrays.asList(10)), x.get("{"));
+        assertEquals(new ArrayList<Integer>(Arrays.asList(3)), x.get("|"));
+        assertEquals(new ArrayList<Integer>(Arrays.asList(0,6)), x.get("}"));
+    }
+
+    @Test
     public void testWithRosalindData() throws IOException {
         String expected = "ACTGCGGTCTAAGGCGACGCAATGAGGAGGTAGAT";
         String raw = new String(Files.readAllBytes(Paths.get("src/test/resources/rosalind_lcsm.txt")));
@@ -124,6 +142,11 @@ public class SuffixTreeNaiveTest {
             t.addString(f.getSeq());
         }
         assertEquals(expected, t.getLongestCommonSubStrings().get(0));
+        Long nonLeavesWithPositionData = t.breadthFirstTraversal(t.root).stream()
+                .filter(n -> n.hasChildren())
+                .filter(n -> n.p != null)
+                .count();
+        assert(nonLeavesWithPositionData == 0);
     }
 
 //    @Test
@@ -137,6 +160,8 @@ public class SuffixTreeNaiveTest {
 //        System.out.print(  s.substring(0,s.length()));
 //        //IntStream.range(0x7b, 0xff).forEachOrdered(i -> System.out.println( "\\u00" + Integer.toHexString(i) ));
 //    }
+
+
 
 
 }

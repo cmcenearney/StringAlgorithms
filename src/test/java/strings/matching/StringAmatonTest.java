@@ -17,4 +17,11 @@ public class StringAmatonTest {
         assertEquals(true, s.getMatched());
     }
 
+    @Test
+    public void testMatches(){
+        String pattern = "abc";
+        String text = "hijklabcmnop";
+        StringAmaton s = new StringAmaton(pattern);
+        assertEquals(true, s.matches(text));
+    }
 }
