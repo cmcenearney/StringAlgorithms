@@ -1,8 +1,9 @@
-package strings;
+package strings.trees;
 
 import org.junit.Test;
-import util.Fasta;
-import util.Utils;
+import strings.util.Fasta;
+import strings.util.Utils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,12 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SuffixTreeNaiveTest {
 
     @Test
-    public void testAllSuffixesOmitsTerminatingChar(){
+    public void testAllSuffixes(){
         String s = "abcdefg$";
         HashSet<String> expected = new HashSet<String>(Arrays.asList("abcdefg$", "bcdefg$", "cdefg$", "defg$", "efg$","fg$", "g$"));
         assertEquals(expected, SuffixTreeNaive.allSuffixes(s));

@@ -1,4 +1,4 @@
-package strings;
+package strings.matching;
 
 import org.junit.Test;
 
@@ -25,9 +25,6 @@ public class FundamentalPreprocessorTest {
         String pattern = "aabcaabxaaz";
         FundamentalPreprocessor f = new FundamentalPreprocessor(pattern);
         int[] zTable = f.generateZTable();
-        for (int i : zTable) {
-            System.out.println(i);
-        }
         assert( zTable[0] == 0 );
         assert( zTable[1] == 1 );
         assert( zTable[4] == 3 );
@@ -37,18 +34,6 @@ public class FundamentalPreprocessorTest {
         assert( zTable[8] == 2 );
     }
 
-//    @Test
-//    public void testGenerateZTableLonger(){
-//        String pattern = "aaabcaaabxaaz";
-//        FundamentalPreprocessor f = new FundamentalPreprocessor(pattern);
-//        int[] zTable = f.generateZTable();
-//        for (int i : zTable) {
-//            System.out.println(i);
-//        }
-//    }
-
-    //abcde
-    //abcdebabddabcdeff
     @Test
     public void testGenerateZTableExp(){
         String pattern = "aabcaabxaaz";

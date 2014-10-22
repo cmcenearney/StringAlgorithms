@@ -1,4 +1,4 @@
-package util;
+package strings.util;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -6,31 +6,6 @@ import java.util.stream.Collectors;
 public class Utils {
 
     static final Comparator<String> compareByLengthDesc = ((s1, s2) -> s2.length() - s1.length());
-
-    public static String bruteForceLCS(List<String> inputs){
-        //TreeSet<String> commonSubStrings = new TreeSet<>(compareByLength);
-        Set<String> commonSubStrings = new HashSet<>();
-        List<HashSet<String>> subStringSets = new LinkedList<HashSet<String>>();
-        for (String s : inputs) {
-            HashSet<String> subStrings = new HashSet<>();
-            for (int i = 0; i < s.length(); i++){
-                for (int j = i+1; j <= s.length();j++){
-                    String subString = s.substring(i,j);
-                    subStrings.add(subString);
-                }
-            }
-            subStringSets.add(subStrings);
-        }
-        commonSubStrings.addAll(subStringSets.get(0));
-        for (int i = 1; i < subStringSets.size(); i++){
-            commonSubStrings.retainAll(subStringSets.get(i));
-        }
-        List<String> sorted = commonSubStrings.stream()
-                .sorted(compareByLengthDesc)
-                .collect(Collectors.toList());
-        return sorted.get(0);
-    }
-
 
     public static List<Fasta> parseRawFastas(String raw){
         List<Fasta> f = new ArrayList<>();
@@ -53,5 +28,29 @@ public class Utils {
                 .map(f -> f.getSeq())
                 .collect(Collectors.toList());
     }
+
+    public static String bruteForceLCS(List<String> inputs){
+        Set<String> commonSubStrings = new HashSet<>();
+        List<HashSet<String>> subStringSets = new LinkedList<HashSet<String>>();
+        for (String s : inputs) {
+            HashSet<String> subStrings = new HashSet<>();
+            for (int i = 0; i < s.length(); i++){
+                for (int j = i+1; j <= s.length();j++){
+                    String subString = s.substring(i,j);
+                    subStrings.add(subString);
+                }
+            }
+            subStringSets.add(subStrings);
+        }
+        commonSubStrings.addAll(subStringSets.get(0));
+        for (int i = 1; i < subStringSets.size(); i++){
+            commonSubStrings.retainAll(subStringSets.get(i));
+        }
+        List<String> sorted = commonSubStrings.stream()
+                .sorted(compareByLengthDesc)
+                .collect(Collectors.toList());
+        return sorted.get(0);
+    }
+
 }
 

@@ -1,20 +1,17 @@
-package strings;
+package strings.trees;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 
 /*
 un-optimized, generalized suffix tree
 capacity = 1113988 strings (based on available terminating chars from 0x7b to 0x10ffff)
  */
-public class SuffixTreeNaive {
+public class SuffixTreeNaive extends Tree {
 
     ArrayList<String> terminatingChars = new ArrayList<>();
-    TreeNode root = new TreeNode();
+    //TreeNode root = new TreeNode();
     private static final int FIRST_TERM_CHAR_VALUE = 0x7b;
 
     public SuffixTreeNaive() {}
@@ -33,7 +30,7 @@ public class SuffixTreeNaive {
         return new String(Character.toChars(current.codePointAt(0) + 1));
     }
 
-    public static Set<String> allSuffixes(String s) {
+    static Set<String> allSuffixes(String s) {
         return IntStream.range(0, s.length() - 1).boxed()
                 .map(i -> s.substring(i))
                 .collect(Collectors.toSet());
@@ -127,18 +124,6 @@ public class SuffixTreeNaive {
                 .collect(Collectors.toSet());
     }
 
-    public List<TreeNode> breadthFirstTraversal(TreeNode node){
-        List<TreeNode> results = new LinkedList<>();
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(node);
-        while (!queue.isEmpty()) {
-            TreeNode n = queue.remove();
-            n.getChildren().values().stream().forEach(i -> queue.add(i));
-            results.add(n);
-        }
-        return results;
-    }
-
     public String nodeValue(TreeNode n) {
         String s = "";
         LinkedList<String> stack = new LinkedList<>();
@@ -197,21 +182,7 @@ public class SuffixTreeNaive {
         return terminatingChars.stream().anyMatch(c -> c.equals(lastChar(edge)));
     }
 
-    public static Integer getLastMatchingIndex(String s1, String s2) {
-        char[] chars1 = s1.toCharArray();
-        char[] chars2 = s2.toCharArray();
-        int i = 0;
-        while (i < chars1.length && i < chars2.length && chars1[i] == chars2[i]) {
-            i++;
-        }
-        return i - 1;
-    }
 
-    public List<String> getEdgeWithSameFirstChar(HashMap<String, TreeNode> edges, String str) {
-        return edges.keySet().stream()
-                .filter(s -> s.startsWith(str.substring(0, 1)))
-                .collect(Collectors.toList());
-    }
 
     public String currentTermChar() {
         return terminatingChars.get(terminatingChars.size() - 1);
@@ -223,7 +194,6 @@ public class SuffixTreeNaive {
         }
         return terminatingChars.get(terminatingChars.size() - 2);
     }
-
 
 
 }
