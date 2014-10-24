@@ -7,6 +7,7 @@ class TreeNode {
     private HashMap<String, TreeNode> children = new HashMap<>();
     private HashMap<String, TreeNode> parent = new HashMap<>();
     Integer p = null;
+    TreeNode suffixLink = null;
 
     TreeNode(){}
 
